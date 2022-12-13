@@ -1,0 +1,33 @@
+%{
+	#include<stdio.h>
+	%}
+	%%
+	[\t]+       /* ignore whitespace */ ;
+	is |
+	am |
+	are |
+	were |
+	go        	{ printf("%s: is a verb\n", yytext); }
+	very |
+	calmly |
+	angrily     	{ printf ("%s: is an adverb\n" , yytext) ; }
+	above |
+	below |
+	between  { printf ("%s: is a preposition\n", yytext);}
+	but |
+	or 		{ printf ("%s: is a conjunction\n", yytext);}
+	his |
+	her |
+	its 		{ printf("%s: is an adjective\n", yytext); }
+	we |
+	they 		{ printf("%s: in a pronoun\n", yytext); }
+	[a-zA-Z]+ {
+	printf("%s: don't recognize, might be a noun\n", yytext);}
+	.|\n { ECHO; /* normal default anyway */ }
+	%%
+	int yywrap(void){}
+	main ( ){
+	printf("Enter a string :- ");
+	yylex();
+	return 0;
+	}

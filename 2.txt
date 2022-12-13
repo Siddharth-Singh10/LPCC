@@ -1,0 +1,109 @@
+from prettytable import PrettyTable
+file = open("code.txt", "r")
+lines = file.readlines()
+mnt = []
+macro_name = []
+p_no = []
+index = []
+mdt = []
+formVpos = {}
+actVpos = {}
+formVposi = {}
+flag = 0
+MNT = PrettyTable()
+MDT = PrettyTable()
+Formal_VS_Positional = PrettyTable()
+Actual_VS_Positional = PrettyTable()
+# Intermediate Code:
+with open("ic2.txt", 'w+') as IC:
+    for line in lines:
+        if "MACRO" in line:
+            flag = 1
+        elif "MEND" in line:
+            flag = 0
+        if flag == 0 and "MEND" not in line:
+            IC.write(line)
+for line in lines:
+    parameters = []
+    if "MACRO" in line:
+        c = 1
+        index.append(len(mdt) + 1)
+        l = line
+        l = l.replace('\t', ' ')
+        l = l.strip()
+        l = l.split(" ")
+        name = l[1]
+        list_of_args = []
+        formal_p = []
+        positional_p = []
+        if len(l) == 2:
+            macro_name.append(l[1])
+            p_no.append(0)
+            flag = 1
+            continue
+        else:
+            parameters += l[2].split(',')
+            no = len(parameters)
+            c = 1
+            for i in range(0, no):
+                s = "#"
+                formal_p.append(parameters[i])
+                s += str(c)
+                c += 1
+                positional_p.append(s)
+                formVposi[parameters[i]] = s
+            list_of_args.append(formal_p)
+            list_of_args.append(positional_p)
+            formVpos[name] = list_of_args
+            macro_name.append(name)
+            p_no.append(no)
+            flag = 1
+    if flag == 1:
+        l = line
+        l = l.strip()
+        if 'MACRO' not in line:
+            mdt.append(l)
+    if 'MEND' in line:
+        flag = 0
+mnt.append(macro_name)
+mnt.append(p_no)
+mnt.append(index)
+mnt_columns = ["Macro Name", "Number of Parameters", "Starting Index"]
+for i in range(len(mnt)):
+    MNT.add_column(mnt_columns[i], mnt[i])
+print(MNT)
+print(mnt)
+print("Formal Parameters Vs Positional Parameters: ", formVpos)
+for line in lines:
+    parameters = []
+    if "MACRO" not in line:
+        list_of_args = []
+        actual_p = []
+        positional_p = []
+        m = line
+        m = m.strip()
+        m = m.split(" ")
+        c = 1
+        if m[0] in mnt[0]:
+            for i in range(1, len(m)):
+                s = "#"
+                s += str(c)
+                c += 1
+                actual_p.append(m[i])
+                positional_p.append(s)
+            list_of_args.append(actual_p)
+            list_of_args.append(positional_p)
+            if m[0] not in actVpos.keys():
+                actVpos[m[0]] = list_of_args
+            else:
+                n = actVpos[m[0]]
+                n[0].append(list_of_args[0][0])
+                n[1].append(list_of_args[1][0])
+                actVpos[m[0]] = n
+print("Actual parameters Vs Positional Parameters: ", actVpos)
+for i in range(len(mdt)):
+    n = mdt[i].split(" ")
+    if len(n) > 1:
+        if n[1] in formVposi.keys():
+            mdt[i] = mdt[i].replace(n[1], formVposi[n[1]])
+print(mdt)
